@@ -1,0 +1,17 @@
+<h1>{{ topic.title }}</h1>
+<p>by {{ topic.author.username }} on {{ topic.created_at|date:"M d, Y H:i" }}</p>
+<div>{{ topic.body }}</div>
+<h2>Replies</h2>
+{% if replies %}
+  <ul>
+    {% for reply in replies %}
+      <li>
+        <p>{{ reply.body }}</p>
+        <small>— {{ reply.author.username }} at {{ reply.created_at|date:"M d, Y H:i" }}</small>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No replies yet.</p>
+{% endif %}
+

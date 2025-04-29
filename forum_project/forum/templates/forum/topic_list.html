@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Forum - Topics</title>
+</head>
+<body>
+    <h1>Topics</h1>
+
+    {% if topics %}
+        <ul>
+            {% for topic in topics %}
+                <div class="topic">
+                    <h2><a href="{% url 'topic_detail' topic.id %}"></a>{{ topic.title }}</h2>
+                    <p>{{ topic.author.username }} - {{ topic.created_at|date:"d M Y H:i" }}</p>
+                </div>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No topics yet.</p>
+    {% endif %}
+</body>
+</html>
+
