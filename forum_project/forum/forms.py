@@ -3,7 +3,7 @@ from .models import Topic, Reply
 
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-
+from django.core.exceptions import ValidationError
 
 class TopicForm(forms.ModelForm):
     """
@@ -37,3 +37,13 @@ class SignUpForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("username", "email", "password1", "password2")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+
+        if password1 and password2 and password1 != password2:
+            raise ValidationError("Password do not match.")
+
+        return cleaned_data

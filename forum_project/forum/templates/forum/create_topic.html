@@ -1,0 +1,14 @@
+<!-- forum/templates/forum/create_topic.html -->
+{% extends 'forum/base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h2>Create a New Topic</h2>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Post Topic</button>
+    </form>
+  </div>
+{% endblock %}
+

@@ -1,17 +1,39 @@
-<h1>{{ topic.title }}</h1>
-<p>by {{ topic.author.username }} on {{ topic.created_at|date:"M d, Y H:i" }}</p>
-<div>{{ topic.body }}</div>
-<h2>Replies</h2>
-{% if replies %}
-  <ul>
-    {% for reply in replies %}
-      <li>
-        <p>{{ reply.body }}</p>
-        <small>— {{ reply.author.username }} at {{ reply.created_at|date:"M d, Y H:i" }}</small>
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>No replies yet.</p>
-{% endif %}
+<!-- forum/templates/forum/topic_detail.html -->
+{% extends 'forum/base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="topic">
+            <h1>{{ topic.title }}</h1>
+            <p>{{ topic.body }}</p>
+            <p><strong>Created by:</strong> {{ topic.author.username }} | <strong>Posted at:</strong> {{ topic.created_at }}</p>
+        </div>
+
+        <div class="reply-form">
+            <h2>Leave a Reply</h2>
+            {% if request.user.is_authenticated %}
+            <form method="POST">
+                {% csrf_token %}
+                {{ reply_form.as_p }}
+                <button type="submit">Post Reply</button>
+            </form>
+            {% else %}
+                <p><a href={% url "login" %}>Login</a> to reply.</p>
+            {% endif %}
+        </div>
+
+
+        <div class="replies">
+            <h3>Replies</h3>
+            {% for reply in replies %}
+                <div class="reply">
+                    <p>{{ reply.body }}</p>
+                    <p><strong>Posted by:</strong> {{ reply.author.username }} | <strong>Posted at:</strong> {{ reply.created_at }}</p>
+                </div>
+            {% empty %}
+                <p>No replies yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
 

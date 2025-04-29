@@ -1,0 +1,95 @@
+/* forum/static/css/style.css */
+
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Navbar styles */
+nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 2% 5%;
+    background-color: #1a1a1a;;
+    color: #fff;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+nav div {
+    font-size: 1.1em;
+}
+
+/* Content area */
+.container {
+    width: 90%;
+    margin: 0 auto;
+    padding: 2%;
+}
+
+h1, h2 {
+    color: #2C3E50;
+}
+
+/* Topic styling */
+.topic {
+    background-color: #ecf0f1;
+    margin-bottom: 10px;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.topic:hover {
+    background-color: #bdc3c7;
+}
+
+/* Replies styling */
+.reply {
+    background-color: #d5dbdb;
+    margin-top: 10px;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+/* Form styles */
+form {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form input, form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+form button {
+    padding: 10px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #2980b9;
+}
+

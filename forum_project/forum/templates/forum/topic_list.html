@@ -1,23 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Forum - Topics</title>
-</head>
-<body>
-    <h1>Topics</h1>
+<!-- forum/templates/forum/topic_list.html -->
+{% extends 'forum/base.html' %}
 
-    {% if topics %}
-        <ul>
-            {% for topic in topics %}
-                <div class="topic">
-                    <h2><a href="{% url 'topic_detail' topic.id %}"></a>{{ topic.title }}</h2>
-                    <p>{{ topic.author.username }} - {{ topic.created_at|date:"d M Y H:i" }}</p>
-                </div>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No topics yet.</p>
-    {% endif %}
-</body>
-</html>
+{% block content %}
+    <div class="container">
+        <h1>All Topics</h1>
+        {% for topic in topics %}
+            <div class="topic">
+                <h2><a href="{% url 'topic_detail' topic.id %}">{{ topic.title }}</a></h2>
+                <p>{{ topic.body|slice:":200" }}...</p>
+                <p><strong>Created by:</strong> {{ topic.author.username }} | <strong>Posted at:</strong> {{ topic.created_at }}</p>
+            </div>
+        {% empty %}
+            <p>No topics available.</p>
+        {% endfor %}
+    </div>
+{% endblock %}
 
