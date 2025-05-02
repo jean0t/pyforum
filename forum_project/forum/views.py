@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseForbidden
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 
 from .models import Topic, Reply
-from .forms import SignUpForm, TopicForm
+from .forms import SignUpForm, TopicForm, ReplyForm
 
 
 def topic_list(request):
@@ -12,11 +13,25 @@ def topic_list(request):
 
 
 def topic_detail(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
+    topic = get_object_or_404(Topic, pk=topic_id)
+    replies = topic.reply_set.order_by("-created_at")
 
-    replies = Reply.objects.filter(topic=topic).order_by("-created_at")
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            form = ReplyForm(request.POST)
+            if form.is_valid():
+                reply = form.save(commit=False)
+                reply.topic = topic
+                reply.author = request.user
+                reply.save()
+                return redirect("topic_detail", topic_id=topic.id)
+        else:
+            return redirect("login")
 
-    return render(request, "forum/topic_detail.html", {"topic": topic, "replies": replies})
+    else:
+        form = ReplyForm()
+
+    return render(request, "forum/topic_detail.html", {"topic": topic, "replies": replies, "form": form})
 
 
 def signup(request):
@@ -32,10 +47,12 @@ def signup(request):
 
     return render(request, "forum/signup.html", {"form": form})
 
+
 @login_required
 def custom_logout(request):
     logout(request)
     return redirect("topic_list")
+
 
 @login_required
 def create_topic(request):
@@ -51,3 +68,63 @@ def create_topic(request):
         form = TopicForm()
 
     return render(request, "forum/create_topic.html", {"form": form})
+
+
+@login_required
+def edit_topic(request, topic_id):
+    topic = get_object_or_404(Topic, pk=topic_id)
+    if topic.author != request.user:
+        return HttpResponseForbidden("You are not allowed to edit this topic.")
+
+    if request.method == "POST":
+        form = TopicForm(request.POST, instance=topic)
+        if form.is_valid():
+            form.save()
+            return redirect("topic_detail", topic_id=topic.id)
+
+    else:
+        form = TopicForm(instance=topic)
+
+    return render(request, "forum/edit_topic.html", {"form": form})
+
+
+@login_required
+def delete_topic(request, topic_id):
+    topic = get_object_or_404(Topic, pk=topic_id)
+    if topic.author != request.user:
+        return HttpResponseForbidden("You are not allowed to delete this topic.")
+
+    if request.method == "POST":
+        topic.delete()
+        return redirect("topic_list")
+
+    return render(request, "forum/delete_topic.html", {"topic": topic})
+
+@login_required
+def edit_reply(request, topic_id, reply_id):
+    reply = get_object_or_404(Reply, pk=reply_id)
+    if reply.author != request.user:
+        return HttpResponseForbidden("You are not allowed to edit this reply.")
+
+    if request.method == "POST":
+        form = ReplyForm(request.POST, instance=reply)
+        if form.is_valid():
+            form.save()
+            return redirect("topic_detail", topic_id=topic_id)
+
+    else:
+        form = ReplyForm(instance=reply)
+
+    return render(request, "forum/edit_reply.html", {"form": form})
+
+@login_required
+def delete_reply(request, topic_id, reply_id):
+    reply = get_object_or_404(Reply, pk=reply_id)
+    if reply.author != request.user:
+        return HttpResponseForbidden("You are not allowed to delete this reply.")
+
+    if request.method == "POST":
+        reply.delete()
+        return redirect("topic_detail", topic_id=topic_id)
+
+    return render(request, "forum/delete_reply.html", {"reply": reply})

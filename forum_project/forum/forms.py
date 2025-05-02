@@ -26,9 +26,10 @@ class ReplyForm(forms.ModelForm):
     class Meta:
         model = Reply
         fields = ["body"]
+        labels = {"body": "Your reply"}
 
         widgets = {
-            "body": forms.Textarea(attrs={"rows": 3, "placeholder": "Write your reply..."}),
+            "body": forms.Textarea(attrs={"rows": 4, "cols": 40, "placeholder": "Write your reply..."}),
         }
 
 class SignUpForm(UserCreationForm):
