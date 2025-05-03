@@ -6,29 +6,20 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 
-# cache
-from django.contrib.auth.decorators.cache import cache_page
-from django.core.cache import cache
-
 # app specific
 from .models import Topic, Reply
 from .forms import SignUpForm, TopicForm, ReplyForm
+from .cache import get_topics, get_replies
 
-CACHE_TIME = 60*3 # 3 minutes
 
-@cache_page(CACHE_TIME) # cache for 3 minutes
 def topic_list(request):
-    topics = Topic.objects.all().order_by("-created_at")
+    topics = get_topics(request)
     return render(request, "forum/topic_list.html", {"topics": topics})
 
 
 def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, pk=topic_id)
-    cache_key = f"topic_{topic_id}_replies"
-    replies = cache.get(cache_key)
-    if replies is None:
-        replies = topic.reply_set.order_by("-created_at")
-        cache.set(cache_key, replies, timeout=CACHE_TIME)
+    replies = get_replies(topic, topic_id)
 
     if request.method == "POST":
         if request.user.is_authenticated:
@@ -94,6 +85,7 @@ def edit_topic(request, topic_id):
         form = TopicForm(request.POST, instance=topic)
         if form.is_valid():
             form.save()
+            update_topics_cache()
             return redirect("topic_detail", topic_id=topic.id)
 
     else:
@@ -110,6 +102,7 @@ def delete_topic(request, topic_id):
 
     if request.method == "POST":
         topic.delete()
+        update_topics_cache()
         return redirect("topic_list")
 
     return render(request, "forum/delete_topic.html", {"topic": topic})
@@ -124,6 +117,7 @@ def edit_reply(request, topic_id, reply_id):
         form = ReplyForm(request.POST, instance=reply)
         if form.is_valid():
             form.save()
+            update_replies_cache(topic_id, reply.topic)
             return redirect("topic_detail", topic_id=topic_id)
 
     else:
@@ -139,6 +133,7 @@ def delete_reply(request, topic_id, reply_id):
 
     if request.method == "POST":
         reply.delete()
+        update_replies_cache(topic_id, reply.topic)
         return redirect("topic_detail", topic_id=topic_id)
 
     return render(request, "forum/delete_reply.html", {"reply": reply})
