@@ -2,11 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators.cache import cache_page
+from django.core.cache import cache
 
 from .models import Topic, Reply
 from .forms import SignUpForm, TopicForm, ReplyForm
 
 
+@cache_page(60*3) # cache for 3 minutes
 def topic_list(request):
     topics = Topic.objects.all().order_by("-created_at")
     return render(request, "forum/topic_list.html", {"topics": topics})
@@ -14,7 +17,10 @@ def topic_list(request):
 
 def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, pk=topic_id)
-    replies = topic.reply_set.order_by("-created_at")
+    replies = cache.get("all_replies")
+    if replies is None:
+        replies = topic.reply_set.order_by("-created_at")
+        cache.set("all_replies", replies, timeout=60*3) # cache time = 3 min
 
     if request.method == "POST":
         if request.user.is_authenticated:
