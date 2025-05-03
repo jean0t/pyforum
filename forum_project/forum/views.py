@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 # app specific
 from .models import Topic, Reply
 from .forms import SignUpForm, TopicForm, ReplyForm
-from .cache import get_topics, get_replies
+from .cache import get_topics, get_replies, update_replies_cache
 
 
 def topic_list(request):
@@ -29,6 +29,7 @@ def topic_detail(request, topic_id):
                 reply.topic = topic
                 reply.author = request.user
                 reply.save()
+                update_replies_cache(topic_id, topic)
                 return redirect("topic_detail", topic_id=topic.id)
         else:
             return redirect("login")
@@ -102,13 +103,14 @@ def delete_topic(request, topic_id):
 
     if request.method == "POST":
         topic.delete()
-        update_topics_cache()
+        update_topics_cache(topic_id, topic)
         return redirect("topic_list")
 
     return render(request, "forum/delete_topic.html", {"topic": topic})
 
 @login_required
 def edit_reply(request, topic_id, reply_id):
+    topic = get_object_or_404(Topic, pk=topic_id)
     reply = get_object_or_404(Reply, pk=reply_id)
     if reply.author != request.user:
         return HttpResponseForbidden("You are not allowed to edit this reply.")
@@ -117,7 +119,7 @@ def edit_reply(request, topic_id, reply_id):
         form = ReplyForm(request.POST, instance=reply)
         if form.is_valid():
             form.save()
-            update_replies_cache(topic_id, reply.topic)
+            update_replies_cache(topic_id, topic)
             return redirect("topic_detail", topic_id=topic_id)
 
     else:
@@ -127,13 +129,14 @@ def edit_reply(request, topic_id, reply_id):
 
 @login_required
 def delete_reply(request, topic_id, reply_id):
+    topic = get_object_or_404(Topic, pk=topic_id)
     reply = get_object_or_404(Reply, pk=reply_id)
     if reply.author != request.user:
         return HttpResponseForbidden("You are not allowed to delete this reply.")
 
     if request.method == "POST":
         reply.delete()
-        update_replies_cache(topic_id, reply.topic)
+        update_replies_cache(topic_id, topic)
         return redirect("topic_detail", topic_id=topic_id)
 
     return render(request, "forum/delete_reply.html", {"reply": reply})
