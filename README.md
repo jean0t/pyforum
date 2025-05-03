@@ -4,8 +4,8 @@ Forum made in python with django 5.2. My goal with this project was 2, exercise 
 
 ## How to Use
 
-1. Build the docker image with the tag python\_forum `docker build -t python_forum .`
-2. Run the docker image with the port that you want `docker run -p <port you want>:8000 python_forum`
+1. Build the docker-compose service by running `docker-compose run --build`
+2. Run the docker-compose with `docker-compose run`
 
 ## Contribution
 
